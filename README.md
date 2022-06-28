@@ -1,9 +1,12 @@
 # Zoom
+
 Zoom Clone Using NodeJS, WebRTC and Websockets.
 
 
 
-## 0.1 Requirements
+## 0. INTRODUCTION
+
+### 0.1 Requirements
 
 백엔드: ExpressJS, app.get(), Pug, (req, res) =>
 
@@ -13,7 +16,7 @@ node.js 설치
 
 
 
-## 0.2 Server Setup
+### 0.2 Server Setup
 
 `mkdir zoom`
 
@@ -149,7 +152,7 @@ npm run dev 시,
 
 
 
-## 0.3 Frontend Setup
+### 0.3 Frontend Setup
 
 static files, 유저들에게 가게 될 파일 만들기 
 
@@ -355,7 +358,7 @@ alert("hi");
 
 
 
-## 0.4 Recap(요약)
+### 0.4 Recap(요약)
 
 **개발환경 구축**
 
@@ -401,3 +404,32 @@ alert("hi");
   - public 파일들에도 똑같은 작업. public 파일들은 FrontEnd에서 구동되는 코드고 아주 중요한 부분. public 폴더를 유저에게 공개. 유저들이 서버 내 모든 폴더 보면 보안상 문제. 따라서 유저가 볼 수 있는 폴더를 따로 지정해준 것.
   - 홈페이지로 이동시 사용될 템플릿 렌더해줌
   - catchall url. 유저가 어떤 url을 입력하던지 home으로 돌려보냄
+
+
+
+
+
+## 1. CHAT WITH WEBSOCKETS
+
+### 1.0 Introduction
+
+실시간 채팅 ex. 슬랙, 디스코드
+
+메시지 보내기, 받기, 닉네임 추가, event 활용, 실시간 채팅방 참여 인원 확인, 입장, 퇴장, 방이 실시간으로 몇 개 존재
+
+ 
+
+### 1.1 HTTP vs WebSockets
+
+- http
+
+stateless. backend가 유저를 기억하지 못한다. 유저와 backend 사이에 아무런 연결 없다. request와 response 과정 뒤에, backend는 유저를 잊어버림. response를 주면 끝난다. 서버로 메시지 보내고 싶은데 이미 로그인이 돼있다면 cookie만 보내면 됨. 프로필 페이지 보고 싶다면 네가 누구인지 알려주는 cookie를 서버에게 보내야 함. 서버는 오직 request받을 때만 response해줌. real-time 아님!
+
+- Websockets
+
+서버 연결됨. 원한다면 서버가 유저에게 메세지 보낼 수 있음. 서버는 request 기다리지 않아도 답장할 수 있음. request, response 과정 필요x. bi-directional. connection 중일때만 연결!! Wi-Fi
+
+
+
+### 1.2 WebSockets in NodeJS
+
