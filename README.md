@@ -433,3 +433,159 @@ stateless. backend가 유저를 기억하지 못한다. 유저와 backend 사이
 
 ### 1.2 WebSockets in NodeJS
 
+node.js로 websocket 서버 만들기
+
+ws package 이용
+
+websocket implementation - node.js, go lang, c#, java
+
+어떤 규칙을 따르는 코드
+
+
+
+ws패키지 다운
+
+`npm i ws`
+
+
+
+우리의 서버를 만들고(보이게 노출시키고) http서버 위에 ws서버 만들기 위함
+
+=> localhost는 동일한 포트에서 http, ws request 두 개 다 처리할 수 있음
+
+- server.js
+
+```javascript
+const app = express();
+
+const handleListen = () => console.log(`Listening on http://localhost:3000`);
+// const handleListen = () => console.log(`Listening on ws://localhost:3000`);
+
+// 같은 서버에서 http와 webSocket 둘 다 작동
+// 2개가 같은 port에 있길 원하기 때문에 이렇게 하는 것
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
+// app.listen과 다른 건 http서버에 access 하려는 것
+// app.listen(3000, handleListen);
+server.listen(3000, handleListen);
+```
+
+
+
+**에러**
+
+```javascript
+import WebSocket from "ws";
+
+const wss = new WebSocket.Server({ server });
+```
+
+**해결**
+
+```javascript
+import WebSocket, {WebSocketServer} from "ws";
+
+const wss = new WebSocketServer({ server });
+```
+
+
+
+### 1.3 WebSocket Events
+
+ws를 사용해서 backend와 frontend 사이에 첫번째 connection 만들 것
+
+Frontend
+
+브라우저가 이미 webSocket 클라이언트에 대한 implementation을 가지고 있다. 아무것도 설치할 필요 x
+
+Backend
+
+http는 `app.get("/", (_, res) => res.render("home"));` url 선언 -> 유저가 url로 가면, req와 res 받고 response 보냄
+
+브라우저에서 event란 click, submit, Wi-Fi on/off 같은 것
+
+websocket에서 event란?
+
+`.on()`
+
+![image-20220629225224484](README.assets/image-20220629225224484.png)
+
+callback으로 socket을 받는다. socket은 연결된 어떤 사람. 연결된 브라우저와의 contact(연락) 라인. socket이용 시 메시지 주고받을 수 있음. 어딘가에 저장(save)해야 함. 최소 console.log라도! 그래야 함수(socket)이라 쓸 수 있음
+
+on method에서는 event가 발동하는 것을 기다린다. 이 경우엔 event가 connection인 것. function을 받는데 connection이 이루어지면 작동! 그리고 backend에 연결된 사람의 정보를 제공해줌. 그 정보는 어디서? socket에서 온다~
+
+- server.js
+
+```javascript
+// vanilla JS
+function handleConnection(socket) {
+  console.log(socket)
+}
+wss.on("connection", handleConnection)
+```
+
+지금은 아무도 연결돼있지 않은 상태. 
+
+
+
+frontend에 backend랑 연결해달라고 해야 한다. 이게 이뤄지면 console에서 socket 볼 수 있음.
+
+- app.js
+
+```javascript
+const socket = new WebSocket("http://localhost:3000/")
+```
+
+새로고침하고 console창 보면
+
+**에러**
+
+Uncaught DOMException: Failed to construct 'WebSocket': The URL's scheme must be either 'ws' or 'wss'. 'http' is not allowed.
+
+**해결**
+
+localhost:3000이라고 하기 싫음. 모바일에는 없기 때문. 우리가 어디에 있는지에 대한 정보를 주자. 브라우저가 스스로 이것을 가져오게!
+
+![image-20220629230929654](README.assets/image-20220629230929654.png)
+
+![image-20220629230941147](README.assets/image-20220629230941147.png)
+
+- app.js
+
+```javascript
+const socket = new WebSocket(`ws://${window.location.host}`);
+```
+
+새로고침하면,
+
+console에 webSocket 뜬다!!
+
+webSocket은 브라우저와 서버사이의 연결
+
+
+
+다시 정리
+
+- server.js
+
+```javascript
+function handleConnection(socket) {
+  console.log(socket)
+}
+wss.on("connection", handleConnection)
+```
+
+위에 함수에 있는 socket이 frontend와 real-time으로 소통할 수 있다. 
+
+socket: 연결된 브라우저
+
+- app.js
+
+```javascript
+const socket = new WebSocket(`ws://${window.location.host}`);
+```
+
+마찬가지로 frontend도 socket 가지고 있음. 여기 frontend에서 backend로 메시지 보내고 backend에서 메시지 받을 수 있음.
+
+socket: 서버로의 연결
